@@ -27,3 +27,7 @@ echo "--> building keywhiz-fs"
 ( cd keywhiz-fs;
   docker build --rm -t square/keywhiz-fs .
 )
+
+echo "you may want to generate new certs with "
+echo "./generate_new_certs.sh"
+

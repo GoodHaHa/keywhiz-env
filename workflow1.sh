@@ -12,7 +12,7 @@ done
 ### build certstrap
 echo "--> building certstrap"
 ( cd certstrap;
-  ./build
+  docker run -ti --rm -v $(pwd):/srv -w /srv golang ./build
 )
 
 ### build keywhiz

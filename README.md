@@ -1,0 +1,5 @@
+Goal
+====
+
+Ease using keywhiz
+

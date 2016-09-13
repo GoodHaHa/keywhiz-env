@@ -4,8 +4,7 @@ set -u
 set -e
 set -o pipefail
 
-echo "--> cleaning any generated certificate. Press ENTER to continue"
-read
+echo "--> cleaning any generated certificate."
 ( cd certstrap;
   rm -rf out/*
 )

@@ -6,6 +6,6 @@ echo "cleaning up"
 rm -v config/deviration.jceks
 
 echo "--> gen-aes"
-docker run --entrypoint 'java' --name tmp-gen-aes -it ${volumes} -w /home/keywhiz -e KEYWHIZ_CONFIG=/keywhiz-config.yml -v keywhiz-db:/data square/keywhiz -jar /usr/src/app/server/target/keywhiz-server-0.7.11-SNAPSHOT-shaded.jar gen-aes
+docker run --entrypoint 'java' --name tmp-gen-aes -it ${volumes} -w /home/keywhiz -e KEYWHIZ_CONFIG=/keywhiz-config.yml -v keywhiz-db:/data square/keywhiz -jar /usr/src/app/server/target/keywhiz-server-0.7.11-SNAPSHOT-shaded.jar gen-aes --storepass CHANGE
 docker cp tmp-gen-aes:/home/keywhiz/derivation.jceks config/derivation.jceks
 docker rm -v tmp-gen-aes

@@ -33,15 +33,16 @@ echo "--> creating server certificate"
   cp out/localhost.p12 out/keystore.p12
 )
 
-#TODO: Generate base derivation key
-# java -jar server/target/keywhiz-server-*-SNAPSHOT-shaded.jar gen-aes
+echo "--> generating pem files"
+( cd certstrap;
+  cat out/localhost.crt out/localhost.key >out/localhost.pem;
+  cat out/Keywhiz_CA.crt out/Keywhiz_CA.key out/Keywhiz_CA.pem;
+)
 
-#TODO: Generate cookie encrypt key
-# head -c 32 /dev/urandom | base64 > cookiekey.base64
+echo "start the wizard, agree to destroy the world, whatever, .."
 
-echo "All kind of keys has been generated:"
-echo "certstrap/out/keystore.p12 # for server"
-echo "certstrap/out/truststore.p12 # for server"
-echo "certstrap/out/client.key # for client"
-echo "certstrap/out/client.crt # for client"
+echo "export CONTAINER='your_container'"
+echo "docker cp Keywhiz_CA.crl $CONTAINER:/secrets/ca-crl.pem"
+echo "docker cp Keywhiz_CA.pem $CONTAINER:/secrets/ca-bundle.pem"
+echo "docker cp localhost.pem $CONTAINER:/secrets/keywhiz-key.pem"
 

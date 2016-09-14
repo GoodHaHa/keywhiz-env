@@ -29,5 +29,5 @@ echo "--> building keywhiz-fs"
 )
 
 echo "you may want to generate new certs with "
-echo "./generate_new_certs.sh"
+echo "expect ./ponies.exp"
 

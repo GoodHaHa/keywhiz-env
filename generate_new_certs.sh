@@ -45,7 +45,7 @@ cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >$
 sudo chmod 744 out/localhost.key
 cd ..
 
-openssl rsa -in ${CDIR}/out/client.key -out ${CDIR}/out/client.unencrypted.key -passin pass:ponies
+openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
 
 echo "# start the wizard, agree to destroy the world, whatever, .."
 echo "cd keywhiz"

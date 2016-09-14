@@ -113,5 +113,5 @@ send -- "ponies\r"
 expect -exact "\r
 Verifying - Enter Export Password:"
 send -- "ponies\r"
+expect -exact "\r"
 send -- ""
-expect eof

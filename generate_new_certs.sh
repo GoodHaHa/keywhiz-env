@@ -50,11 +50,23 @@ openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/clie
 echo "# start the wizard, agree to destroy the world, whatever, .."
 # echo "cd keywhiz"
 # echo "docker run -it --rm -v keywhiz-data:/data -v keywhiz-secrets:/secrets square/keywhiz wizard"
-echo "start wizard with ./wizard.sh"
-echo "#############"
-echo "export CONTAINER='your_container'"
-echo "docker cp certstrap/out/Keywhiz_CA.crl \$CONTAINER:/secrets/ca-crl.pem"
-echo "docker cp certstrap/out/Keywhiz_CA.pem \$CONTAINER:/secrets/ca-bundle.pem"
-echo "docker cp certstrap/out/localhost.key \$CONTAINER:/secrets/keywhiz-key.pem"
-echo "docker cp certstrap/out/localhost.crt \$CONTAINER:/secrets/keywhiz.pem"
 
+### remove volumes
+echo "--> removing old volumes"
+docker volume rm keywhiz-data || true
+docker volume rm keywhiz-secrets || true
+
+### copy files to the volume
+echo "--> copying files to the volume"
+DCP="docker run --rm -v keywhiz-secrets:/data -v $(pwd):/srv ubuntu:trusty"
+echo "----- srv ----"
+$DCP ls /srv/certstrap/out
+echo "----- data ----"
+$DCP ls /data
+echo "----- copying -----"
+$DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
+$DCP cp /srv/certstrap/out/Keywhiz_CA.pem /data/ca-bundle.pem
+$DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
+$DCP cp /srv/certstrap/out/localhost.crt /data/keywhiz.pem
+
+echo "start wizard with ./wizard.sh to install certificates"

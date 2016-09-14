@@ -48,8 +48,9 @@ cd ..
 openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
 
 echo "# start the wizard, agree to destroy the world, whatever, .."
-echo "cd keywhiz"
-echo "docker run -it --rm -v keywhiz-data:/data -v keywhiz-secrets:/secrets square/keywhiz wizard"
+# echo "cd keywhiz"
+# echo "docker run -it --rm -v keywhiz-data:/data -v keywhiz-secrets:/secrets square/keywhiz wizard"
+echo "start wizard with ./wizard.sh"
 echo "#############"
 echo "export CONTAINER='your_container'"
 echo "docker cp certstrap/out/Keywhiz_CA.crl \$CONTAINER:/secrets/ca-crl.pem"

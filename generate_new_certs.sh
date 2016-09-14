@@ -5,10 +5,11 @@ set -e
 set -o pipefail
 
 DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv java8"
+CDIR=$(pwd)
 
 echo "--> cleaning any generated certificate."
 ( cd certstrap;
-  rm -rf out/*
+  sudo rm -rf out/*
 )
 
 echo "--> creating CA";
@@ -16,7 +17,7 @@ echo "--> creating CA";
   $DRUN ls
   $DRUN bin/certstrap init --key-bits 4096 --years 1 --common-name "Keywhiz CA";
   $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/Keywhiz_CA.p12;
-  $DRUN cp out/Keywhiz_CA.p12 out/truststore.p12
+  sudo cp out/Keywhiz_CA.p12 out/truststore.p12
 )
 
 
@@ -37,10 +38,12 @@ echo "--> creating server certificate"
 )
 
 echo "--> generating pem files"
-( cd certstrap;
-  $DRUN cat out/localhost.crt out/localhost.key >out/localhost.pem;
-  $DRUN cat out/Keywhiz_CA.crt out/Keywhiz_CA.key >out/Keywhiz_CA.pem;
-)
+cd certstrap
+sudo chown -R webi.webi ${CDIR}/certstrap/out
+cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/localhost.key >${CDIR}/certstrap/out/localhost.pem
+cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >${CDIR}/certstrap/out/Keywhiz_CA.pem
+sudo chmod 744 out/localhost.key
+cd ..
 
 echo "# start the wizard, agree to destroy the world, whatever, .."
 echo "cd keywhiz"
@@ -49,5 +52,6 @@ echo "#############"
 echo "export CONTAINER='your_container'"
 echo "docker cp certstrap/out/Keywhiz_CA.crl \$CONTAINER:/secrets/ca-crl.pem"
 echo "docker cp certstrap/out/Keywhiz_CA.pem \$CONTAINER:/secrets/ca-bundle.pem"
-echo "docker cp certstrap/out/localhost.pem \$CONTAINER:/secrets/keywhiz-key.pem"
+echo "docker cp certstrap/out/localhost.key \$CONTAINER:/secrets/keywhiz-key.pem"
+echo "docker cp certstrap/out/localhost.crt \$CONTAINER:/secrets/keywhiz.pem"
 

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "cleaning up data volumes"
+docker volume rm keywhiz-data
+docker volume rm keywhiz-secrets
+
 docker run -it --rm \
     -v keywhiz-data:/data \
     -v keywhiz-secrets:/secrets \

@@ -43,6 +43,9 @@ sudo chown -R webi.webi ${CDIR}/certstrap/out
 cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/localhost.key >${CDIR}/certstrap/out/localhost.pem
 cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >${CDIR}/certstrap/out/Keywhiz_CA.pem
 sudo chmod 744 out/localhost.key
+
+cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem
+
 cd ..
 
 openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
@@ -55,6 +58,9 @@ echo "# start the wizard, agree to destroy the world, whatever, .."
 echo "--> removing old volumes"
 docker volume rm keywhiz-data || true
 docker volume rm keywhiz-secrets || true
+echo "--> creating new volumes"
+docker volume create --name keywhiz-data
+docker volume create --name keywhiz-secrets
 
 ### copy files to the volume
 echo "--> copying files to the volume"
@@ -65,18 +71,21 @@ echo "----- data ----"
 $DCP ls /data
 echo "----- copying -----"
 
+# keystore from PRIVATE_KEY_PEM and CERT_CHAIN_PEM
+
 # CERT_CHAIN_PEM
-$DCP cp /srv/certstrap/out/Keywhiz_CA.crt /data/keywhiz.pem
+$DCP cp /srv/certstrap/out/cert_chain.pem /data/keywhiz.pem
 
 # PRIVATE_KEY_PEM
-sudo chmod 644 certstrap/out/Keywhiz_CA.key
-$DCP cp /srv/certstrap/out/Keywhiz_CA.key /data/keywhiz-key.pem
+sudo chmod 644 certstrap/out/localhost.key
+$DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
 
 # CA_BUNDLE_PEM
-$DCP cp /srv/certstrap/out/localhost.pem /data/ca-bundle.pem
+$DCP cp /srv/certstrap/out/localhost.crt /data/ca-bundle.pem
 
 # Certification revocation something
 $DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
+
 
 # $DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
 # $DCP cp /srv/certstrap/out/Keywhiz_CA.pem /data/ca-bundle.pem

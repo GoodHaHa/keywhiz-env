@@ -64,9 +64,23 @@ $DCP ls /srv/certstrap/out
 echo "----- data ----"
 $DCP ls /data
 echo "----- copying -----"
+
+# CERT_CHAIN_PEM
+$DCP cp /srv/certstrap/out/Keywhiz_CA.crt /data/keywhiz.pem
+
+# PRIVATE_KEY_PEM
+sudo chmod 644 certstrap/out/Keywhiz_CA.key
+$DCP cp /srv/certstrap/out/Keywhiz_CA.key /data/keywhiz-key.pem
+
+# CA_BUNDLE_PEM
+$DCP cp /srv/certstrap/out/localhost.pem /data/ca-bundle.pem
+
+# Certification revocation something
 $DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
-$DCP cp /srv/certstrap/out/Keywhiz_CA.pem /data/ca-bundle.pem
-$DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
-$DCP cp /srv/certstrap/out/localhost.crt /data/keywhiz.pem
+
+# $DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
+# $DCP cp /srv/certstrap/out/Keywhiz_CA.pem /data/ca-bundle.pem
+# $DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
+# $DCP cp /srv/certstrap/out/localhost.crt /data/keywhiz.pem
 
 echo "start wizard with ./wizard.sh to install certificates"

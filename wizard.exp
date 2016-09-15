@@ -79,12 +79,7 @@ Files can be copied into a running container with docker cp.\r
 \r
 Hit enter to continue."
 send -- "\r"
-expect -exact "\r
-\r
-Bundling certificate and private key into PKCS#12 keystore... Enter pass phrase for /secrets/keywhiz-key.pem:"
-send -- "ponies\r"
-expect -exact "\r
-New username:"
+expect "New username:"
 send -- "admin\r"
 expect -exact "admin\r
 password for 'admin': "

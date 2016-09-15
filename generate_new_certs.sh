@@ -38,7 +38,14 @@ echo "--> creating server certificate"
   $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12;
   $DRUN cp out/localhost.p12 out/keystore.p12
 )
-  cat ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem;
+  sudo chmod 744 ${CDIR}/certstrap/out/localhost.key
+  sudo chmod 744 ${CDIR}/certstrap/out/client.key
+
+  openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
+  openssl rsa -in ${CDIR}/certstrap/out/localhost.key -out ${CDIR}/certstrap/out/localhost.unencrypted.key -passin pass:ponies
+
+  cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem;
+  cat ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/client.unencrypted.key >${CDIR}/certstrap/out/client.pem
 
 
 echo "--> generating pem files"
@@ -46,13 +53,9 @@ cd certstrap
 sudo chown -R webi.webi ${CDIR}/certstrap/out
 cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/localhost.key >${CDIR}/certstrap/out/localhost.pem
 cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >${CDIR}/certstrap/out/Keywhiz_CA.pem
-sudo chmod 744 out/localhost.key
-sudo chmod 744 out/client.key
 
 cd ..
 
-openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
-openssl rsa -in ${CDIR}/certstrap/out/localhost.key -out ${CDIR}/certstrap/out/localhost.unencrypted.key -passin pass:ponies
 
 ### remove volumes
 echo "--> removing old volumes"
@@ -77,20 +80,15 @@ echo "----- copying -----"
 $DCP cp /srv/certstrap/out/cert_chain.pem /data/keywhiz.pem
 
 # PRIVATE_KEY_PEM
-sudo chmod 644 certstrap/out/localhost.key
-$DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
+sudo chmod 644 certstrap/out/*
+$DCP cp /srv/certstrap/out/localhost.unencrypted.key /data/keywhiz-key.pem
 
 # CA_BUNDLE_PEM
-$DCP cp /srv/certstrap/out/localhost.crt /data/ca-bundle.pem
+cp ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/localhost.crt >${CDIR}/certstrap/out/bundle.pem
+$DCP cp /srv/certstrap/out/bundle.pem /data/ca-bundle.pem
 
 # Certification revocation something
 touch ${CDIR}/certstrap/out/nothing.crl
 $DCP cp /srv/certstrap/out/nothing.crl /data/ca-crl.pem
-
-
-# $DCP cp /srv/certstrap/out/Keywhiz_CA.crl /data/ca-crl.pem
-# $DCP cp /srv/certstrap/out/Keywhiz_CA.pem /data/ca-bundle.pem
-# $DCP cp /srv/certstrap/out/localhost.key /data/keywhiz-key.pem
-# $DCP cp /srv/certstrap/out/localhost.crt /data/keywhiz.pem
 
 echo "start wizard with ./wizard.sh to install certificates"

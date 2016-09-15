@@ -15,9 +15,16 @@ Features
 * Configuration by environment variables
 
 ## How to build keywhiz-fs locally (not docker)
+
+### Build keywhiz-fs
 ```
 cd keywhiz-fs
 docker run -ti --rm -v $(pwd):/srv -w /srv golang bash -c 'go get ./...;make keywhiz-fs'
 ```
 
+### Mount
+```
+cd certstrap/out
+keywhiz-fs --cert client.crt --key client.unencrypted.key --ca Keywhiz_CA.crt https://127.0.0.1:4444 /secret/kwfs
+```
 

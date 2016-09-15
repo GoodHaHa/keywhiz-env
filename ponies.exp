@@ -41,20 +41,14 @@ if {$force_conservative} {
 #
 # -Don
 
-
 set timeout -1
 spawn $env(SHELL)
 match_max 100000
-expect -exact "\[38;5;202m\[38;5;245mwebi\[00m@\[38;5;172mwebi\[00m:\[38;5;5m~/build/keywhiz-env\[00m⟫ "
+expect "keywhiz-env"
 send -- "./genera	"
 expect -exact "te_new_certs.sh "
 send -- "\r"
-expect -exact "\r
---> cleaning any generated certificate.\r
---> creating CA\r
-CONTRIBUTING.md  LICENSE  README.md  build	   cmd	  gopath  pkix	tests\r
-Godeps		 NOTICE   bin	     certstrap.go  depot  out	  test\r
-Enter passphrase (empty for no passphrase): "
+expect "Enter passphrase (empty for no passphrase): "
 send -- "ponies\r"
 expect -exact "\r
 \r

@@ -15,15 +15,17 @@ echo "--> cleaning any generated certificate."
 echo "--> creating CA";
 ( cd certstrap;
   $DRUN ls
-  $DRUN bin/certstrap init --key-bits 4096 --years 1 --common-name "Keywhiz CA";
+  $DRUN bin/certstrap init --key-bits 4096 --years 5 --common-name "Keywhiz CA";
   $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/Keywhiz_CA.p12;
   sudo cp out/Keywhiz_CA.p12 out/truststore.p12
 )
 
-
 echo "--> creating client certificates";
 ( cd certstrap;
   $DRUN bin/certstrap request-cert --common-name client;
+  echo "--- listing files ---";
+  $DRUN ls
+  echo "---------------------";
   $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" client;
   $DRUN bin/certstrap request-cert --common-name noSecretsClient;
   $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" noSecretsClient
@@ -36,6 +38,8 @@ echo "--> creating server certificate"
   $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12;
   $DRUN cp out/localhost.p12 out/keystore.p12
 )
+  cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem;
+
 
 echo "--> generating pem files"
 cd certstrap
@@ -44,7 +48,6 @@ cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/localhost.key >${C
 cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >${CDIR}/certstrap/out/Keywhiz_CA.pem
 sudo chmod 744 out/localhost.key
 
-cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem
 
 cd ..
 

@@ -28,6 +28,11 @@ echo "--> building keywhiz-fs"
   docker build --rm -t square/keywhiz-fs .
 )
 
-echo "you may want to generate new certs with "
-echo "expect ./ponies.exp"
+echo "--> generating certifications with password 'ponies'"
+./ponies.exp
 
+echo "--> importing certifications"
+./wizard.exp
+
+echo "--> starting keywhiz server"
+./wizard-start.sh

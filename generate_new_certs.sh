@@ -38,7 +38,7 @@ echo "--> creating server certificate"
   $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12;
   $DRUN cp out/localhost.p12 out/keystore.p12
 )
-  cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem;
+  cat ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/Keywhiz_CA.crt >${CDIR}/certstrap/out/cert_chain.pem;
 
 
 echo "--> generating pem files"
@@ -47,15 +47,12 @@ sudo chown -R webi.webi ${CDIR}/certstrap/out
 cat ${CDIR}/certstrap/out/localhost.crt ${CDIR}/certstrap/out/localhost.key >${CDIR}/certstrap/out/localhost.pem
 cat ${CDIR}/certstrap/out/Keywhiz_CA.crt ${CDIR}/certstrap/out/Keywhiz_CA.key >${CDIR}/certstrap/out/Keywhiz_CA.pem
 sudo chmod 744 out/localhost.key
-
+sudo chmod 744 out/client.key
 
 cd ..
 
 openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
-
-echo "# start the wizard, agree to destroy the world, whatever, .."
-# echo "cd keywhiz"
-# echo "docker run -it --rm -v keywhiz-data:/data -v keywhiz-secrets:/secrets square/keywhiz wizard"
+openssl rsa -in ${CDIR}/certstrap/out/localhost.key -out ${CDIR}/certstrap/out/localhost.unencrypted.key -passin pass:ponies
 
 ### remove volumes
 echo "--> removing old volumes"

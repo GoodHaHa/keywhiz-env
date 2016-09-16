@@ -23,8 +23,6 @@ KEYSTORE_PASSWORD=$(cat ${CDIR}/certstrap/out/keystore_password)
 echo "--> creating CA";
 ( cd certstrap;
   $DRUN bin/certstrap init --key-bits 4096 --years 5 --common-name "Keywhiz CA";
-  $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/Keywhiz_CA.p12;
-  sudo cp out/Keywhiz_CA.p12 out/truststore.p12
 )
 
 echo "--> creating client certificates";
@@ -37,9 +35,16 @@ echo "--> creating server certificate"
 ( cd certstrap;
   $DRUN bin/certstrap request-cert --domain localhost --ip 127.0.0.1 --organizational-unit server;
   $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" localhost;
-  $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12 -password "pass:${KEYSTORE_PASSWORD}";
-  $DRUN cp out/localhost.p12 out/keystore.p12
 )
+
+  echo "--> building truststore"
+  $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/truststore.p12;
+  $DRUN keytool -import -file 'out/localhost.crt' -alias localhost -storetype pkcs12 -storepass ponies -keystore out/truststore.p12;
+
+  echo "--> building keystore"
+  $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/keystore.p12 -certfile out/Keywhiz_CA.crt -password "pass:${KEYSTORE_PASSWORD}";
+
+  echo "--> enforcing permissions"
   sudo chmod 744 ${CDIR}/certstrap/out/localhost.key
   sudo chmod 744 ${CDIR}/certstrap/out/client.key
 
@@ -71,8 +76,8 @@ echo "----- copying ----"
 touch ${CDIR}/aaa
 
 $DCP cp -v /srv/aaa /secrets/ca-crl.pem
-$DCP cp -v /srv/certstrap/out/Keywhiz_CA.p12 /secrets/ca-bundle.p12
-$DCP cp -v /srv/certstrap/out/localhost.p12 /secrets/keywhiz-server.p12
+$DCP cp -v /srv/certstrap/out/truststore.p12 /secrets/ca-bundle.p12
+$DCP cp -v /srv/certstrap/out/keystore.p12 /secrets/keywhiz-server.p12
 $DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
 $DCP cp -v /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-key.jceks
 $DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml

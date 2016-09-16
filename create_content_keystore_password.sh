@@ -8,6 +8,8 @@ echo "--> ${0} starting"
 CONTENT_KEYSTORE_PASSWORD=$(head -c16 /dev/urandom | xxd -p)
 CONTENT_KEYSTORE_PATH="certstrap/out/content-encryption-keys.jceks"
 
+echo "${CONTENT_KEYSTORE_PASSWORD}" >certstrap/out/content_keystore_password
+
 if [[ -f "${CONTENT_KEYSTORE_PATH}" ]]; then
   echo "--> cleaning up ${CONTENT_KEYSTORE_PATH}"
   rm -f "${CONTENT_KEYSTORE_PATH}"

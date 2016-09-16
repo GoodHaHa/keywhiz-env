@@ -8,7 +8,7 @@ echo "--> ${0} started"
 
 CDIR=$(pwd)
 DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv java8"
-DCP="docker run --rm -v keywhiz-secrets:/secrets -v $(pwd):/srv ubuntu:trusty"
+DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv ubuntu:trusty"
 
 echo "--> cleaning any generated certificate."
 ( cd certstrap;
@@ -17,6 +17,7 @@ echo "--> cleaning any generated certificate."
 
 (./create_cookie_key.sh)
 (./create_content_keystore_password.sh)
+(./create_keystore_password.sh)
 
 echo "--> creating CA";
 ( cd certstrap;
@@ -60,10 +61,16 @@ echo "----- srv ----"
 $DCP ls /srv/certstrap/out
 echo "----- data ----"
 ls /srv
+
+echo "----- generating docker config --------"
+(./generate-docker-config.sh)
+
 echo "----- copying ----"
-$DCP cp /srv/certstrap/out/Keywhiz_CA.p12 /secrets/ca-bundle.p12
-$DCP cp /srv/certstrap/out/localhost.p12 /secrets/keywhiz-server.p12
-$DCP cp /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
-$DCP cp /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-keys.jceks
+
+$DCP cp -v /srv/certstrap/out/Keywhiz_CA.p12 /secrets/ca-bundle.p12
+$DCP cp -v /srv/certstrap/out/localhost.p12 /secrets/keywhiz-server.p12
+$DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
+$DCP cp -v /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-keys.jceks
+$DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml
 
 echo "--> ${0} finished"

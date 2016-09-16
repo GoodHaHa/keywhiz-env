@@ -1,26 +1,17 @@
-# Copyright 2013 Square, Inc.
-
-# ORIGINAL FILE IS keywhiz-development.yaml.docker. IF MODIFYING keywhiz-development.yaml CHANGES
-# MAY BE OVERWRITTEN!
-
-# Passwords/secrets should not be checked into SCM. However, sprinkled below are some passwords and
-# keys that are NOT considered sensitive and only to be used in development and testing.
----
-
 server:
   applicationConnectors:
     - type: https
       port: 4444
-      keyStorePath: /keystore.p12
-      keyStorePassword: ponies 
+      keyStorePath: ${KEYSTORE_PATH}
+      keyStorePassword: ${KEYSTORE_PASSWORD}
       keyStoreType: PKCS12
-      trustStorePath: /truststore.p12
-      trustStorePassword: ponies
+      trustStorePath: ${TRUSTSTORE_PATH} 
+      trustStorePassword: ${TRUSTSTORE_PASSWORD}
       trustStoreType: PKCS12
       wantClientAuth: true
       enableCRLDP: false
       enableOCSP: false
-      crlPath: /keywhiz.crl
+      crlPath: ${CRL_PATH}
       supportedProtocols: [TLSv1.2]
       supportedCipherSuites:
         - TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256
@@ -44,15 +35,11 @@ logging:
     - type: console
       threshold: ALL
 
-## Use this logging configuration if you want EVERYTHING
-# logging:
-#   level: ALL
-
-environment: development
+environment: docker
 
 database:
   driverClass: org.h2.Driver
-  url: jdbc:h2:/data/keywhizdb
+  url: jdbc:h2:/data/keywhizdb_development
   user: root
   properties:
     charSet: UTF-8
@@ -64,7 +51,7 @@ database:
 
 readonlyDatabase:
   driverClass: org.h2.Driver
-  url: jdbc:h2:/data/keywhizdb
+  url: jdbc:h2:/data/keywhizdb_development
   user: root
   properties:
     charSet: UTF-8
@@ -78,18 +65,10 @@ readonlyDatabase:
 migrationsDir:
   db/h2/migration
 
-statusCacheExpiry: PT1S
-
 userAuth:
   type: bcrypt
 
-# Uncomment to load assets from disk. Development is easier because assets will not be cached and
-# can be changed on-the-fly. DO NOT USE IN PRODUCTION because assets are not cached.
-# alternateUiPath: ui/app/
-
-# Contains base64 of "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA". A real key could be generated with
-# `head -c 32 /dev/urandom | base64 > cookiekey.base64`.
-cookieKey: external:server/src/main/resources/dev_and_test_cookiekey.base64
+cookieKey: ${COOKIE_KEY_PATH}
 
 sessionCookie:
   name: session
@@ -101,7 +80,7 @@ xsrfCookie:
   httpOnly: false
 
 contentKeyStore:
-  path: /derivation.jceks
+  path: ${CONTENT_KEYSTORE_PATH}
   type: JCEKS
-  password: CHANGE
+  password: ${CONTENT_KEYSTORE_PASSWORD}
   alias: basekey

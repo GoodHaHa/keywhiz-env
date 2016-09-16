@@ -40,6 +40,7 @@ echo "--> creating server certificate"
   echo "--> building truststore"
   $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/truststore.p12;
   $DRUN keytool -import -file 'out/localhost.crt' -alias localhost -storetype pkcs12 -storepass ponies -keystore out/truststore.p12;
+  $DRUN keytool -import -file 'out/client.crt' -alias client -storetype pkcs12 -storepass ponies -keystore out/truststore.p12;
 
   echo "--> building keystore"
   $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/keystore.p12 -certfile out/Keywhiz_CA.crt -password "pass:${KEYSTORE_PASSWORD}";

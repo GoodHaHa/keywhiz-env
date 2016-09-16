@@ -18,6 +18,7 @@ echo "--> cleaning any generated certificate."
 (./create_cookie_key.sh)
 (./create_content_keystore_password.sh)
 (./create_keystore_password.sh)
+KEYSTORE_PASSWORD=$(cat ${CDIR}/certstrap/out/keystore_password)
 
 echo "--> creating CA";
 ( cd certstrap;
@@ -36,7 +37,7 @@ echo "--> creating server certificate"
 ( cd certstrap;
   $DRUN bin/certstrap request-cert --domain localhost --ip 127.0.0.1 --organizational-unit server;
   $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" localhost;
-  $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12;
+  $DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/localhost.p12 -password "pass:${KEYSTORE_PASSWORD}";
   $DRUN cp out/localhost.p12 out/keystore.p12
 )
   sudo chmod 744 ${CDIR}/certstrap/out/localhost.key
@@ -67,10 +68,16 @@ echo "----- generating docker config --------"
 
 echo "----- copying ----"
 
+touch ${CDIR}/aaa
+
+$DCP cp -v /srv/aaa /secrets/ca-crl.pem
 $DCP cp -v /srv/certstrap/out/Keywhiz_CA.p12 /secrets/ca-bundle.p12
 $DCP cp -v /srv/certstrap/out/localhost.p12 /secrets/keywhiz-server.p12
 $DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
-$DCP cp -v /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-keys.jceks
+$DCP cp -v /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-key.jceks
 $DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml
 
+rm ${CDIR}/aaa
+
 echo "--> ${0} finished"
+

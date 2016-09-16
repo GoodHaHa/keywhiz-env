@@ -8,10 +8,7 @@ echo "--> ${0} starting"
 
 export KEYWHIZ_CONFIG='certstrap/out/keywhiz-docker.yaml'
 export KEYSTORE_PATH='/secrets/keywhiz-server.p12'
-
-export KEYSTORE_PASSWORD=''
-#KEYSTORE_PASSWORD=$(cat certstrap/out/content_keystore_password)
-
+export KEYSTORE_PASSWORD=$(cat certstrap/out/keystore_password)
 export TRUSTSTORE_PATH='/secrets/ca-bundle.p12'
 export TRUSTSTORE_PASSWORD='ponies'
 export CRL_PATH='/secrets/ca-crl.pem'

@@ -91,15 +91,6 @@ expect -exact "\r
 Created out/localhost.crt from out/localhost.csr signed by out/Keywhiz_CA.key\r
 Enter pass phrase for out/localhost.key:"
 send -- "ponies\r"
-expect -exact "\r
-Enter Export Password:"
-send -- "ponies\r"
-expect -exact "\r
-Verifying - Enter Export Password:"
-send -- "ponies\r"
-expect "./generate_new_certs.sh finished"
-send -- "\r"
-expect "keywhiz-env"
+expect -re ".*generate_new_certs.sh finished.*"
 sleep 1
-send -- "^D"
-exit
+send -- "exit\r"

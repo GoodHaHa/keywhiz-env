@@ -29,10 +29,13 @@ echo "--> building keywhiz-fs"
 )
 
 echo "--> generating certifications with password 'ponies'"
-./ponies.exp
+./generate_new_certs.sh
 
-echo "--> importing certifications"
-./wizard.exp
+echo "--> running migration"
+./migrate.sh
 
-echo "--> starting keywhiz server"
-./wizard-start.sh
+echo "--> adding user"
+./add-user.sh
+
+echo "--> starting server"
+./start.sh

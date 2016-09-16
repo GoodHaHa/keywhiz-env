@@ -85,7 +85,7 @@ $DCP cp /srv/certstrap/out/localhost.unencrypted.key /data/keywhiz-key.pem
 
 # CA_BUNDLE_PEM
 cp ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/localhost.crt >${CDIR}/certstrap/out/bundle.pem
-$DCP cp /srv/certstrap/out/bundle.pem /data/ca-bundle.pem
+$DCP cp /srv/certstrap/out/localhost.crt /data/ca-bundle.pem
 
 # Certification revocation something
 touch ${CDIR}/certstrap/out/nothing.crl

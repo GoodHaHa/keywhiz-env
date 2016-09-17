@@ -6,13 +6,13 @@ set -o pipefail
 
 echo "--> ${0} started"
 
-. ./.env
-./cleanup.sh
-
-CDIR=$(pwd)
 DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv tmp_keywhiz_stuff"
+D="docker run -ti --rm -v $(pwd):/srv -w /srv tmp_keywhiz_stuff"
 DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
 C="./certstrap-wrapper.sh"
+CDIR=$(pwd)
+. ./.env
+./cleanup.sh
 
 echo "writing down passwords for copying"
 mkdir -p certstrap/out || true
@@ -23,20 +23,19 @@ echo "${FRONTEND_PASSWORD}">certstrap/out/frontend_password
 
 echo "--> generating a few stuff"
 
-keytool \
-  -genseckey -alias basekey -keyalg AES -keysize 128 -storepass "${CONTENT_KEYSTORE_PASSWORD}" \
-  -keypass "${CONTENT_KEYSTORE_PASSWORD}" -storetype jceks -keystore ${SECRET_DIR}/${CONTENT_KEYSTORE_NAME}
+$D keytool -genseckey -alias basekey -keyalg AES -keysize 128 -storepass "${CONTENT_KEYSTORE_PASSWORD}" -keypass "${CONTENT_KEYSTORE_PASSWORD}" -storetype jceks -keystore ${SECRET_DIR}/${CONTENT_KEYSTORE_NAME}
 
 echo "--> creating CA: ${CA_NAME}"
-${C} ${CA_PASSWORD} init --key-bits 4096 --years ${CA_YEARS} --common-name \"${CA_NAME}\"
+${D} ${C} ${CA_PASSWORD} init --key-bits 4096 --years ${CA_YEARS} --common-name \"${CA_NAME}\"
+
 echo "--> creating client certificates";
-${C} ${CRT_CLIENT_PASSWORD} request-cert --common-name ${CRT_CLIENT_NAME}
-${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA "${CA_NAME}" ${CRT_CLIENT_NAME}
+${D} ${C} ${CRT_CLIENT_PASSWORD} request-cert --common-name ${CRT_CLIENT_NAME}
+${D} ${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA "${CA_NAME}" ${CRT_CLIENT_NAME}
 
 
 echo "--> creating server certificate"
-${C} ${CRT_SERVER_PASSWORD} request-cert --domain ${CRT_SERVER_DOMAIN} --ip ${CRT_SERVER_IP} --organizational-unit ${CRT_SERVER_ORGANIZATIONAL_UNIT}
-${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA \"${CA_NAME}\" ${CRT_SERVER_DOMAIN}
+${D} ${C} ${CRT_SERVER_PASSWORD} request-cert --domain ${CRT_SERVER_DOMAIN} --ip ${CRT_SERVER_IP} --organizational-unit ${CRT_SERVER_ORGANIZATIONAL_UNIT}
+${D} ${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA \"${CA_NAME}\" ${CRT_SERVER_DOMAIN}
 
 echo "--> building truststore: ca, server, client"
 $DRUN keytool -import -file "out/${CA_NAME}.crt" -alias ${CA_ALIAS} -storetype pkcs12 -noprompt -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
@@ -47,12 +46,12 @@ echo "--> building keystore"
 $DRUN openssl pkcs12 -export -in out/${CRT_SERVER_DOMAIN}.crt -inkey out/${CRT_SERVER_DOMAIN}.key -out out/${KEYSTORE_NAME} -certfile out/${CA_NAME}.crt -password "pass:${KEYSTORE_PASSWORD}" -passin pass:${CRT_SERVER_PASSWORD};
 
 echo "--> enforcing relaxed key permissions"
-sudo chmod 744 ${CDIR}/certstrap/out/${CRT_SERVER_DOMAIN}.key
-sudo chmod 744 ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key
+${D} chmod 744 certstrap/out/${CRT_SERVER_DOMAIN}.key
+${D} chmod 744 certstrap/out/${CRT_CLIENT_NAME}.key
 
 echo "--> creating client.pem"
-openssl rsa -in ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key -out ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:${CRT_CLIENT_PASSWORD}
-cat ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.crt ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key >${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.pem
+${D} openssl rsa -in certstrap/out/${CRT_CLIENT_NAME}.key -out certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:${CRT_CLIENT_PASSWORD}
+${D} cat certstrap/out/${CRT_CLIENT_NAME}.crt certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key >certstrap/out/${CRT_CLIENT_NAME}.pem
 
 echo "--> creating new volumes"
 docker volume create --name keywhiz-data

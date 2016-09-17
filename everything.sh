@@ -4,6 +4,11 @@ set -e
 set -u
 set -o pipefail
 
+echo "--> building tmp container"
+cd tmp_container
+docker build -t tmp_keywhiz_stuff .
+cd ..
+
 ### ensure repositories are in place ###
 cat repo_list.txt | grep -v '^$' | while read LN; do
   ./ensure_repo.sh "${LN}"

@@ -7,8 +7,8 @@ set -o pipefail
 echo "--> ${0} started"
 
 CDIR=$(pwd)
-DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv java8"
-DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv ubuntu:trusty"
+DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv tmp_keywhiz_stuff"
+DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
 
 echo "--> cleaning any generated certificate."
 sudo rm -rf ${CDIR}/certstrap/out/*
@@ -21,29 +21,20 @@ echo "--> generating a few stuff"
 echo "--> getting stuff which we have generated"
 KEYSTORE_PASSWORD=$(cat ${CDIR}/certstrap/out/keystore_password)
 
-echo "--> creating CA";
-( cd certstrap;
-  $DRUN bin/certstrap init --key-bits 4096 --years 5 --common-name "Keywhiz CA";
-)
+echo "--> creating CA"
+$DRUN bin/certstrap init --key-bits 4096 --years 5 --common-name "Keywhiz CA"
 
 echo "--> creating client certificates";
-( cd certstrap;
-  $DRUN bin/certstrap request-cert --common-name client;
-  $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" client;
-)
+$DRUN bin/certstrap request-cert --common-name client
+$DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" client
 
 echo "--> creating server certificate"
-cd certstrap
 $DRUN bin/certstrap request-cert --domain localhost --ip 127.0.0.1 --organizational-unit server
 $DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" localhost
-cd ..
 
-echo "--> building truststore"
-echo "    adding CA to truststore"
+echo "--> building truststore: ca, server, client"
 $DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
-echo "    adding server to truststore"
 $DRUN keytool -import -file 'out/localhost.crt' -alias localhost -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
-echo "    adding client to truststore"
 $DRUN keytool -import -file 'out/client.crt' -alias client -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
 
 echo "--> building keystore"

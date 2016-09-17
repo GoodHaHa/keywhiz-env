@@ -11,6 +11,7 @@ D="docker run -ti --rm -v $(pwd):/srv -w /srv tmp_keywhiz_stuff"
 DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
 C="./certstrap-wrapper.sh"
 CDIR=$(pwd)
+
 . ./.env
 ./cleanup.sh
 
@@ -79,7 +80,6 @@ rm -v ${CDIR}/aaa
 envsubst <./add-user.exp>run.sh
 expect ./run.sh
 rm run.sh
-
 
 echo "--> ${0} finished"
 

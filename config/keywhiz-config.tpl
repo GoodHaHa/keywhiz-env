@@ -68,7 +68,7 @@ migrationsDir:
 userAuth:
   type: bcrypt
 
-cookieKey: ${COOKIE_KEY_PATH}
+cookieKey: ${COOKIE_KEY}
 
 sessionCookie:
   name: session

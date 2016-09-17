@@ -30,12 +30,3 @@ echo "--> building keywhiz-fs"
 
 echo "--> generating certifications with password 'ponies'"
 ./generate_new_certs.sh
-
-echo "--> running migration"
-./migrate.sh
-
-echo "--> adding user"
-./add-user.sh
-
-echo "--> starting server"
-./start.sh

@@ -14,6 +14,13 @@ DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv tmp_keywhiz_stuff"
 DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
 C="./certstrap-wrapper.sh"
 
+echo "writing down passwords for copying"
+mkdir -p certstrap/out || true
+echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
+echo "${COOKIE_KEY}">certstrap/out/cookie.key.base64
+echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/content_keystore_password
+echo "${FRONTEND_PASSWORD}">certstrap/out/frontend_password
+
 echo "--> generating a few stuff"
 
 keytool \
@@ -53,12 +60,6 @@ docker volume create --name keywhiz-secrets
 
 echo "----- creating an empty file ------"
 touch ${CDIR}/aaa
-
-echo "writing down passwords for copying"
-echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
-echo "${COOKIE_KEY}">certstrap/out/cookie.key.base64
-echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/content_keystore_password
-echo "${FRONTEND_PASSWORD}">certstrap/out/frontend_password
 
 echo "----- generating docker config --------"
 envsubst < config/keywhiz-config.tpl > certstrap/out/keywhiz-docker.yaml

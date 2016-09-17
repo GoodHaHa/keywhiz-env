@@ -26,7 +26,9 @@ docker ps -a | grep keywhiz | grep 'Exited' | while read CONTAINER; do
 done
 
 echo "--> removing docker volumes"
+set +e
 docker volume ls | grep keywhiz | awk '{print $2}' | while read VOLUME; do
   echo "removing volume: ${VOLUME}"
   docker volume rm ${VOLUME}
 done
+set -e

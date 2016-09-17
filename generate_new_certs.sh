@@ -7,14 +7,12 @@ set -o pipefail
 echo "--> ${0} started"
 
 . ./.env
+./cleanup.sh
 
 CDIR=$(pwd)
 DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv tmp_keywhiz_stuff"
 DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
 C="./certstrap-wrapper.sh"
-
-echo "--> cleaning any generated certificate."
-sudo rm -vrf ${SECRET_DIR}/*
 
 echo "--> generating a few stuff"
 
@@ -49,35 +47,38 @@ echo "--> creating client.pem"
 openssl rsa -in ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key -out ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:ponies
 cat ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.crt ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key >${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.pem
 
-echo "--> removing old volumes"
-docker volume rm keywhiz-data || true
-docker volume rm keywhiz-secrets || true
-
 echo "--> creating new volumes"
 docker volume create --name keywhiz-data
 docker volume create --name keywhiz-secrets
-
-echo "----- generating docker config --------"
-./generate-docker-config.sh
 
 echo "----- creating an empty file ------"
 touch ${CDIR}/aaa
 
 echo "writing down passwords for copying"
 echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
-echo "${COOKIE_KEY}">certstrap/out/cookie_key
+echo "${COOKIE_KEY}">certstrap/out/cookie.key.base64
 echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/${CONTENT_KEYSTORE_NAME}
+echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/content_keystore_password
+
+echo "----- generating docker config --------"
+./generate-docker-config.sh
 
 echo "----- copying stuff ----"
 $DCP cp -v /srv/aaa /secrets/ca-crl.pem
 $DCP cp -v /srv/certstrap/out/${TRUSTSTORE_NAME} /secrets/ca-bundle.p12
 $DCP cp -v /srv/certstrap/out/${KEYSTORE_NAME} /secrets/keywhiz-server.p12
-$DCP cp -v /srv/certstrap/out/cookie_key /secrets/cookie.key.base64
+$DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
 $DCP cp -v /srv/certstrap/out/${CONTENT_KEYSTORE_NAME} /secrets/${CONTENT_KEYSTORE_NAME}
 $DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml
 
 echo "---- removing empty file -----"
 rm -v ${CDIR}/aaa
+
+./migrate.sh
+
+envsubst <./add-user.exp>run.sh
+expect ./run.sh
+rm run.sh
 
 echo "--> ${0} finished"
 

@@ -34,7 +34,7 @@ ${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA \"${CA_NAME}\" ${CRT_SERVER_DO
 echo "--> building truststore: ca, server, client"
 $DRUN keytool -import -file "out/${CA_NAME}.crt" -alias ${CA_ALIAS} -storetype pkcs12 -noprompt -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
 $DRUN keytool -import -file "out/${CRT_SERVER_DOMAIN}.crt" -alias ${CRT_SERVER_DOMAIN} -storetype pkcs12 -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
-$DRUN keytool -import -file "out/${CRT_CLIENT_NAME}.crt" -alias ${CRT_CLIENT_NAME} -storetype pkcs12 -storepass ${CRT_CLIENT_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
+$DRUN keytool -import -file "out/${CRT_CLIENT_NAME}.crt" -alias ${CRT_CLIENT_NAME} -storetype pkcs12 -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
 
 echo "--> building keystore"
 $DRUN openssl pkcs12 -export -in out/${CRT_SERVER_DOMAIN}.crt -inkey out/${CRT_SERVER_DOMAIN}.key -out out/${KEYSTORE_NAME} -certfile out/${CA_NAME}.crt -password "pass:${KEYSTORE_PASSWORD}" -passin pass:${CRT_SERVER_PASSWORD};
@@ -44,7 +44,7 @@ sudo chmod 744 ${CDIR}/certstrap/out/${CRT_SERVER_DOMAIN}.key
 sudo chmod 744 ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key
 
 echo "--> creating client.pem"
-openssl rsa -in ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key -out ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:ponies
+openssl rsa -in ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key -out ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:${CRT_CLIENT_PASSWORD}
 cat ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.crt ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key >${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.pem
 
 echo "--> creating new volumes"
@@ -57,16 +57,16 @@ touch ${CDIR}/aaa
 echo "writing down passwords for copying"
 echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
 echo "${COOKIE_KEY}">certstrap/out/cookie.key.base64
-echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/${CONTENT_KEYSTORE_NAME}
 echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/content_keystore_password
+echo "${FRONTEND_PASSWORD}">certstrap/out/frontend_password
 
 echo "----- generating docker config --------"
-./generate-docker-config.sh
+envsubst < config/keywhiz-config.tpl > certstrap/out/keywhiz-docker.yaml
 
 echo "----- copying stuff ----"
 $DCP cp -v /srv/aaa /secrets/ca-crl.pem
-$DCP cp -v /srv/certstrap/out/${TRUSTSTORE_NAME} /secrets/ca-bundle.p12
-$DCP cp -v /srv/certstrap/out/${KEYSTORE_NAME} /secrets/keywhiz-server.p12
+$DCP cp -v /srv/certstrap/out/${TRUSTSTORE_NAME} ${TRUSTSTORE_PATH}
+$DCP cp -v /srv/certstrap/out/${KEYSTORE_NAME} ${KEYSTORE_PATH}
 $DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
 $DCP cp -v /srv/certstrap/out/${CONTENT_KEYSTORE_NAME} /secrets/${CONTENT_KEYSTORE_NAME}
 $DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml
@@ -79,6 +79,7 @@ rm -v ${CDIR}/aaa
 envsubst <./add-user.exp>run.sh
 expect ./run.sh
 rm run.sh
+
 
 echo "--> ${0} finished"
 

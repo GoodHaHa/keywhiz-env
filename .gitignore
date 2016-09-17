@@ -1,5 +1,6 @@
 *.swp
 *~
+*.tfstate*
 certstrap
 keywhiz
 keywhiz-fs

@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+spawn ./add-user.sh
+match_max 100000
+expect -exact "New username:"
+send -- "${FRONTEND_USERNAME}\r"
+expect "password for"
+send -- "${FRONTEND_PASSWORD}\r"
+expect eof

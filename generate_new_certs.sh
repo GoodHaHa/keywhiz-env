@@ -6,47 +6,48 @@ set -o pipefail
 
 echo "--> ${0} started"
 
+. ./.env
+
 CDIR=$(pwd)
 DRUN="docker run -ti --rm -v $(pwd)/certstrap:/srv -w /srv tmp_keywhiz_stuff"
 DCP="docker run --rm -v keywhiz-secrets:/secrets -v keywhiz-data:/data -v $(pwd):/srv tmp_keywhiz_stuff"
+C="./certstrap-wrapper.sh"
 
 echo "--> cleaning any generated certificate."
-sudo rm -rf ${CDIR}/certstrap/out/*
+sudo rm -vrf ${SECRET_DIR}/*
 
 echo "--> generating a few stuff"
-./create_cookie_key.sh
-./create_content_keystore_password.sh
-./create_keystore_password.sh
 
-echo "--> getting stuff which we have generated"
-KEYSTORE_PASSWORD=$(cat ${CDIR}/certstrap/out/keystore_password)
+keytool \
+  -genseckey -alias basekey -keyalg AES -keysize 128 -storepass "${CONTENT_KEYSTORE_PASSWORD}" \
+  -keypass "${CONTENT_KEYSTORE_PASSWORD}" -storetype jceks -keystore ${SECRET_DIR}/${CONTENT_KEYSTORE_NAME}
 
-echo "--> creating CA"
-$DRUN bin/certstrap init --key-bits 4096 --years 5 --common-name "Keywhiz CA"
-
+echo "--> creating CA: ${CA_NAME}"
+${C} ${CA_PASSWORD} init --key-bits 4096 --years ${CA_YEARS} --common-name \"${CA_NAME}\"
 echo "--> creating client certificates";
-$DRUN bin/certstrap request-cert --common-name client
-$DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" client
+${C} ${CRT_CLIENT_PASSWORD} request-cert --common-name ${CRT_CLIENT_NAME}
+${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA "${CA_NAME}" ${CRT_CLIENT_NAME}
+
 
 echo "--> creating server certificate"
-$DRUN bin/certstrap request-cert --domain localhost --ip 127.0.0.1 --organizational-unit server
-$DRUN bin/certstrap sign --years 1 --CA "Keywhiz CA" localhost
+${C} ${CRT_SERVER_PASSWORD} request-cert --domain ${CRT_SERVER_DOMAIN} --ip ${CRT_SERVER_IP} --organizational-unit ${CRT_SERVER_ORGANIZATIONAL_UNIT}
+${C} ${CA_PASSWORD} sign --years ${CA_YEARS} --CA \"${CA_NAME}\" ${CRT_SERVER_DOMAIN}
 
 echo "--> building truststore: ca, server, client"
-$DRUN keytool -import -file 'out/Keywhiz_CA.crt' -alias ca -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
-$DRUN keytool -import -file 'out/localhost.crt' -alias localhost -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
-$DRUN keytool -import -file 'out/client.crt' -alias client -storetype pkcs12 -storepass ponies -keystore out/truststore.p12
+$DRUN keytool -import -file "out/${CA_NAME}.crt" -alias ${CA_ALIAS} -storetype pkcs12 -noprompt -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
+$DRUN keytool -import -file "out/${CRT_SERVER_DOMAIN}.crt" -alias ${CRT_SERVER_DOMAIN} -storetype pkcs12 -storepass ${TRUSTSTORE_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
+$DRUN keytool -import -file "out/${CRT_CLIENT_NAME}.crt" -alias ${CRT_CLIENT_NAME} -storetype pkcs12 -storepass ${CRT_CLIENT_PASSWORD} -keystore out/${TRUSTSTORE_NAME}
 
 echo "--> building keystore"
-$DRUN openssl pkcs12 -export -in out/localhost.crt -inkey out/localhost.key -out out/keystore.p12 -certfile out/Keywhiz_CA.crt -password "pass:${KEYSTORE_PASSWORD}";
+$DRUN openssl pkcs12 -export -in out/${CRT_SERVER_DOMAIN}.crt -inkey out/${CRT_SERVER_DOMAIN}.key -out out/${KEYSTORE_NAME} -certfile out/${CA_NAME}.crt -password "pass:${KEYSTORE_PASSWORD}" -passin pass:${CRT_SERVER_PASSWORD};
 
 echo "--> enforcing relaxed key permissions"
-sudo chmod 744 ${CDIR}/certstrap/out/localhost.key
-sudo chmod 744 ${CDIR}/certstrap/out/client.key
+sudo chmod 744 ${CDIR}/certstrap/out/${CRT_SERVER_DOMAIN}.key
+sudo chmod 744 ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key
 
 echo "--> creating client.pem"
-openssl rsa -in ${CDIR}/certstrap/out/client.key -out ${CDIR}/certstrap/out/client.unencrypted.key -passin pass:ponies
-cat ${CDIR}/certstrap/out/client.crt ${CDIR}/certstrap/out/client.unencrypted.key >${CDIR}/certstrap/out/client.pem
+openssl rsa -in ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.key -out ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key -passin pass:ponies
+cat ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.crt ${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.unencrypted.key >${CDIR}/certstrap/out/${CRT_CLIENT_NAME}.pem
 
 echo "--> removing old volumes"
 docker volume rm keywhiz-data || true
@@ -62,12 +63,17 @@ echo "----- generating docker config --------"
 echo "----- creating an empty file ------"
 touch ${CDIR}/aaa
 
+echo "writing down passwords for copying"
+echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
+echo "${COOKIE_KEY}">certstrap/out/cookie_key
+echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/${CONTENT_KEYSTORE_NAME}
+
 echo "----- copying stuff ----"
 $DCP cp -v /srv/aaa /secrets/ca-crl.pem
-$DCP cp -v /srv/certstrap/out/truststore.p12 /secrets/ca-bundle.p12
-$DCP cp -v /srv/certstrap/out/keystore.p12 /secrets/keywhiz-server.p12
-$DCP cp -v /srv/certstrap/out/cookie.key.base64 /secrets/cookie.key.base64
-$DCP cp -v /srv/certstrap/out/content-encryption-keys.jceks /secrets/content-encryption-key.jceks
+$DCP cp -v /srv/certstrap/out/${TRUSTSTORE_NAME} /secrets/ca-bundle.p12
+$DCP cp -v /srv/certstrap/out/${KEYSTORE_NAME} /secrets/keywhiz-server.p12
+$DCP cp -v /srv/certstrap/out/cookie_key /secrets/cookie.key.base64
+$DCP cp -v /srv/certstrap/out/${CONTENT_KEYSTORE_NAME} /secrets/${CONTENT_KEYSTORE_NAME}
 $DCP cp -v /srv/certstrap/out/keywhiz-docker.yaml /data/keywhiz-docker.yaml
 
 echo "---- removing empty file -----"

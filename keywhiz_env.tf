@@ -76,6 +76,7 @@ resource "aws_instance" "example" {
   key_name = "deployer-key"
   vpc_security_group_ids = ["${aws_security_group.default.id}"]
   subnet_id = "${aws_subnet.default.id}"
+  depends_on = ["aws_route.internet_access", "aws_internet_gateway.default", "aws_subnet.default"]
   connection {
       user = "ubuntu"
       type = "ssh"

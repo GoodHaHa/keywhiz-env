@@ -4,6 +4,9 @@ set -e
 set -u
 set -o pipefail
 
+echo "--> checking dependencies"
+./check_deps.sh
+
 echo "--> building tmp container"
 ( cd builder;
   docker build -t tmp_keywhiz_stuff .

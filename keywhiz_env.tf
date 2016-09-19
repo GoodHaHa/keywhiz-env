@@ -72,7 +72,7 @@ resource "aws_security_group" "default" {
 
 resource "aws_instance" "example" {
   ami           = "ami-48db9d28"
-  instance_type = "t2.nano"
+  instance_type = "t2.small"
   key_name = "deployer-key"
   vpc_security_group_ids = ["${aws_security_group.default.id}"]
   subnet_id = "${aws_subnet.default.id}"

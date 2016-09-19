@@ -13,6 +13,9 @@ sudo apt-get -y install docker-engine
 sudo usermod -G docker ubuntu
 echo "--- docker installed --- "
 
-sudo apt-get -y install jq
+sudo apt-get -y install jq git
 
-
+git clone https://github.com/gyulaweber/keywhiz-env.git
+cd keywhiz-env
+sudo ./everything.sh
+sudo ./test.sh

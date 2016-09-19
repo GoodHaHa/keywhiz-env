@@ -13,7 +13,9 @@ sudo apt-get -y install docker-engine
 sudo usermod -G docker ubuntu
 echo "--- docker installed --- "
 
-sudo apt-get -y install jq git
+sudo apt-get -y install jq git fuse
+
+echo 'user_allow_other'>>/etc/fuse.conf
 
 git clone https://github.com/gyulaweber/keywhiz-env.git
 cd keywhiz-env

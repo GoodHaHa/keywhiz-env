@@ -28,8 +28,14 @@ echo "--> building keywhiz"
 
 echo "--> building keywhiz-fs"
 ( cd keywhiz-fs;
-  docker build --rm -t square/keywhiz-fs .
+  echo "----> installing keywhiz-fs dependencies; it may take a while..";
+  docker run -ti --rm -v $(pwd):/srv -w /srv -e GOPATH=/srv golang go get -d ./...
+  echo "----> building keywhiz-fs"
+  docker run -ti --rm -v $(pwd):/srv -w /srv -e GOPATH=/srv golang make keywhiz-fs
+  sudo mv srv /usr/local/bin/keywhiz-fs
+
 )
+# docker build --rm -t square/keywhiz-fs . # it works, but I want keywhiz-fs on the host
 
 echo "--> generating certifications with password 'ponies'"
 ./generate_new_certs.sh

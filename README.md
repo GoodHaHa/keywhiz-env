@@ -3,9 +3,21 @@ Goal
 
 Ease start using keywhiz in a secure way.
 
-Features
-========
+Dependencies
+============
 
-* Launch a keywhiz server and keywhiz-fs in two different nodes with newly generated keys.
-* Configuration by environment variables
+* Ubuntu xenial
+* Docker Engine 1.12.1
+* expect, jq
+
+What it does
+============
+
+It generates every cert stuff, passwords, so it won't be the insucere / developer version.
+
+How can I try it out
+====================
+
+* run ``` ./everything.sh ```
+* run ``` ./test.sh ```
 

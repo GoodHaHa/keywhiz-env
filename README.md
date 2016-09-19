@@ -16,7 +16,7 @@ Dependencies
 What it does
 ============
 
-It generates every cert stuff, passwords, so it won't be the insucere / developer version.
+It generates every cert stuff, passwords, so it won't be the insecure / developer version.
 
 How can I try it out
 ====================

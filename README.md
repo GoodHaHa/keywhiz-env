@@ -3,6 +3,9 @@ Goal
 
 Ease start using keywhiz in a secure way.
 
+1. Make it work
+2. Make it right
+
 Dependencies
 ============
 

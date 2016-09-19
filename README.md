@@ -3,8 +3,8 @@ Goal
 
 Ease start using keywhiz in a secure way.
 
-(x) Make it work
-( ) Make it right
+- [x] Make it work
+- [ ] Make it right
 
 Dependencies
 ============

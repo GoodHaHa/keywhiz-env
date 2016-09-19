@@ -1,4 +1,4 @@
-git@github.com:square/certstrap.git
-git@github.com:square/keywhiz.git
-git@github.com:square/keywhiz-fs.git
+https://github.com/square/certstrap.git
+https://github.com/square/keywhiz.git
+https://github.com/square/keywhiz-fs.git
 

@@ -30,3 +30,35 @@ In the end of the process, you should see
 ```
 
 It means, that the client (keywhiz-fs) is able to reach the server, and the server status is "ok".
+
+How to try out with AWS
+=======================
+
+!!! WARNING !!! It may cost you, please check keywhiz_env.tf for resource details, and run ``` tf plan ``` before you do anything. I can't, and I won't take any responsibility about the consequences.
+
+* Setup you server.tfvars with your aws credentials, like
+```
+access_key = "YOUR_ACCESS_KEY"
+secret_key = "YOUR_SECRET_KEY"
+```
+* put your public ssh key to variables.tf
+* install terraform
+* ``` terraform apply --var-file <YOUR_WAR_FILE> ```
+
+After ~10 minutes, you should see this:
+```
+aws_instance.example: Still creating... (10m30s elapsed)
+aws_instance.example (remote-exec): keywhiz-server
+aws_instance.example (remote-exec): keywhiz-server
+aws_instance.example (remote-exec): ---- Keywhiz OK -----
+aws_instance.example: Creation complete
+
+Apply complete! Resources: 7 added, 0 changed, 0 destroyed.
+
+The state of your infrastructure has been saved to the path
+below. This state is required to modify and destroy your
+infrastructure, so keep it safe. To inspect the complete state
+use the `terraform show` command.
+
+State path: terraform.tfstate
+```

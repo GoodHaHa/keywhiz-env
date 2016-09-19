@@ -36,14 +36,14 @@ How to try out with AWS
 
 !!! WARNING !!! It may cost you, please check keywhiz_env.tf for resource details, and run ``` tf plan ``` before you do anything. I can't, and I won't take any responsibility about the consequences.
 
-* Setup you server.tfvars with your aws credentials, like
+* Setup you server.tf with your aws credentials, like
 ```
 access_key = "YOUR_ACCESS_KEY"
 secret_key = "YOUR_SECRET_KEY"
 ```
 * put your public ssh key to variables.tf
 * install terraform
-* ``` terraform apply --var-file <YOUR_WAR_FILE> ```
+* ``` terraform apply --var-file server.tf ```
 
 After ~10 minutes, you should see this:
 ```
@@ -62,3 +62,9 @@ use the `terraform show` command.
 
 State path: terraform.tfstate
 ```
+
+### What it does
+
+Basically, everything. Many external dependencies, but this is a test build, so we won't want to depend on other builds.
+
+* 

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#./everything.sh
 ./start-daemon.sh
 while ! nc -q 1 localhost 4444 </dev/null; do echo "waiting for port.."; sleep 1; done
 sleep 5 # assume it's enough time to initialize

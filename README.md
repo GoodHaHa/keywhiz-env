@@ -22,3 +22,8 @@ How can I try it out
 * run ``` ./test.sh ```
 
 In the end of the process, you should see
+```
+---- Keywhiz OK ----
+```
+
+It means, that the client (keywhiz-fs) is able to reach the server, and the server status is "ok".

@@ -36,6 +36,10 @@ ls keywhiz-secrets | while read ENTRY; do
   docker cp keywhiz-secrets/${ENTRY} copyreceiver:/keywhiz-secrets/
 done
 
+echo "--> setting up permissions within the volume"
+docker exec copyreceiver chmod -R 666 /keywhiz-secrets/
+docker exec copyreceiver chmod -R 666 /keywhiz-data/
+
 echo "--> cleaning up"
 docker stop copyreceiver
 docker rm -v copyreceiver

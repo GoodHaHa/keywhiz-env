@@ -18,6 +18,7 @@ CDIR=$(pwd)
 echo "writing down passwords for copying"
 mkdir -p certstrap/out || true
 echo "${KEYSTORE_PASSWORD}">certstrap/out/keystore_password
+echo "${TRUSTSTORE_PASSWORD}">certstrap/out/TRUSTSTORE_password
 echo "${COOKIE_KEY}">certstrap/out/cookie.key.base64
 echo "${CONTENT_KEYSTORE_PASSWORD}">certstrap/out/content_keystore_password
 echo "${FRONTEND_PASSWORD}">certstrap/out/frontend_password

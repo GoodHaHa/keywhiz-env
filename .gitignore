@@ -5,3 +5,6 @@ certstrap
 keywhiz
 keywhiz-fs
 config/derivation.jceks
+keywhiz-data
+keywhiz-secrets
+

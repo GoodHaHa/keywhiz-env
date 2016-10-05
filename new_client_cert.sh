@@ -6,6 +6,10 @@ set -o pipefail
 
 client="${1}"
 
+. ./.env
+
+#TODO: use CA name from the env file
+
 echo "--> creating client certificates";
 ( cd certstrap;
   bin/certstrap request-cert --common-name ${client};
@@ -17,3 +21,5 @@ echo "--> creating client certificates";
 echo "certstrap/out/${client}.key # for ${client}"
 echo "certstrap/out/${client}.crt # for ${client}"
 
+#TODO: stop keywhiz server, get the truststore file, add the key, copy the truststore file back,
+#      or find a better idea of doing that.

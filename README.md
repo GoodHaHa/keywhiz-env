@@ -21,6 +21,8 @@ It generates every cert stuff, passwords, so it won't be the insecure / develope
 How can I try it out
 ====================
 
+* run ``` cp .env.example .env ```
+* edit the file to fit your needs (server ip, server domain is important if want to use it remotely)
 * run ``` ./everything.sh ```
 * run ``` ./test.sh ```
 

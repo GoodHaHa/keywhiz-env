@@ -2,6 +2,5 @@
 
 . /opt/.env
 
-# TODO: get truststore path from ../.ENVj
-echo "truststore password is ${TRUSTSTORE_PASSWORD}"
+# TODO: get truststore path from ../.ENV
 java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar $@

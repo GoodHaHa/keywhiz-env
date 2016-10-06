@@ -4,9 +4,11 @@ set -xeuo pipefail
 
 INSERT_FILE=""
 
-. ./.env
+if [[ -f .env ]]; then
+  . ./.env
+fi
 
-H=$(HOME)
+H=${HOME}
 
 if [[ ! -d ${H}/.keywhiz-tmp ]]; then
   mkdir -pv ${H}/.keywhiz-tmp

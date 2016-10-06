@@ -4,4 +4,32 @@
 
 set -xueo pipefail
 
-java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} $@
+GOT_FILE=0
+USE_FILE=""
+VALID_PARAMS=""
+CRAZY_STUFF=""
+
+## see if we want to add a secret from a file
+for var in "$@"
+do
+  if [[ "${var}" == '--file' ]]; then
+    echo "we are trying to use a file"
+    GOT_FILE=1
+  elif [[ ${GOT_FILE} == 1 ]]; then
+    USE_FILE="${var}"
+  else
+    VALID_PARAMS="${VALID_PARAMS} ${var}"
+  fi
+done
+
+if [[ ${GOT_FILE} == "1" ]]; then
+  echo "docker/internal using file: ${USE_FILE}"
+
+  echo "contents: $(cat /tmp/${USE_FILE})"
+
+  echo "remaining valid parameters: ${VALID_PARAMS}"
+  CRAZY_STUFF="</tmp/${USE_FILE}"
+fi
+
+java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} ${VALID_PARAMS} ${CRAZY_STUFF}
+

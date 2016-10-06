@@ -1,5 +1,0 @@
-export KEYWHIZ_URL=https://yourhost:4444
-
-# format: hostname:ipaddress
-export KEYWHIZ_HOSTENTRY=yourhost:yourip
-export KEYWHIZ_ADMIN_USER='youradminuser'

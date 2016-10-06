@@ -2,9 +2,7 @@ Preparations
 ============
 
 * ``` cp .env.example .env ```
-* setup your password in the ```.env``` file
-* ``` cp .setup.example .setup ```
-* setup your keywhiz url, admin user name in the ``` .setup file ```
+* setup your password and other stuff in the ```.env``` file
 * Copy your truststore to this directory, as ```ca-bundle.p12```
 * ``` docker build -t keywhiz-cli . ```
 

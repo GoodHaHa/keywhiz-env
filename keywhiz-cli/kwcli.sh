@@ -6,7 +6,7 @@ INSERT_FILE=""
 
 . ./.env
 
-H=$(pwd)
+H=$(HOME)
 
 if [[ ! -d ${H}/.keywhiz-tmp ]]; then
   mkdir -pv ${H}/.keywhiz-tmp

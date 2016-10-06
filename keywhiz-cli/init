@@ -2,5 +2,6 @@
 
 . /opt/.env
 
-# TODO: get truststore path from ../.ENV
-java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar $@
+set -xueo pipefail
+
+java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} $@

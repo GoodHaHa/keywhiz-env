@@ -1,3 +1,4 @@
+keywhiz-cli/ca-bundle.p12
 tmp_cmd.sh
 .env
 *.swp

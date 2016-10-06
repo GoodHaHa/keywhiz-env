@@ -2,7 +2,7 @@
 
 . /opt/.env
 
-set -xueo pipefail
+set -ueo pipefail
 
 GOT_FILE=0
 USE_FILE=""

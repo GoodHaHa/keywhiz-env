@@ -1,0 +1,3 @@
+KEYWHIZ_URL=https://yourhost:4444
+KEYWHIZ_HOSTENTRY=yourhost:yourip
+KEYWHIZ_ADMIN_USER='youradminuser'

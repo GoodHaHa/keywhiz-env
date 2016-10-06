@@ -25,11 +25,10 @@ done
 if [[ ${GOT_FILE} == "1" ]]; then
   echo "docker/internal using file: ${USE_FILE}"
 
-  echo "contents: $(cat /tmp/${USE_FILE})"
-
   echo "remaining valid parameters: ${VALID_PARAMS}"
-  CRAZY_STUFF="</tmp/${USE_FILE}"
+  java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} ${VALID_PARAMS} < /tmp/${USE_FILE}
+else
+  java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} ${VALID_PARAMS}
 fi
 
-java -Djavax.net.ssl.trustStore=/truststore.p12 -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD} -jar /keywhiz/cli/target/keywhiz-cli-*-SNAPSHOT-shaded.jar --user ${KEYWHIZ_ADMIN_USER} --url ${KEYWHIZ_URL} ${VALID_PARAMS} ${CRAZY_STUFF}
 

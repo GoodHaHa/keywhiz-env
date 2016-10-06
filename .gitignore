@@ -1,3 +1,5 @@
+remote_backup_secrets
+remote_backup_data
 keywhiz-cli/.setup
 keywhiz-cli/ca-bundle.p12
 tmp_cmd.sh

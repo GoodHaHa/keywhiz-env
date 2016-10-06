@@ -18,7 +18,4 @@ It will ask your password for the first time.
 
 ## Adding secrets
 
-The original syntax is ``` keywhiz.cli add secret --name mySecret.key --group myGroup < mySecretContents.key ``` 
-But it won't work in docker, so instead of ``` < mySecretContents.key ```, write ``` --file mySecretContentsKey ```
-
-
+* ``` ./kwcli.sh add secret --name SecretFile.key --file SecretFile.key ```

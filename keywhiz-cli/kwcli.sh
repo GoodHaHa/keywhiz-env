@@ -4,10 +4,6 @@ set -euo pipefail
 
 INSERT_FILE=""
 
-if [[ -f .env ]]; then
-  . ./.env
-fi
-
 H=${HOME}
 
 if [[ ! -d ${H}/.keywhiz-tmp ]]; then
